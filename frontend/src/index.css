@@ -1,0 +1,86 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * { box-sizing: border-box; }
+  html, body, #root { height: 100%; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', system-ui, sans-serif;
+    background: #f0f4ff;
+    color: #0e1828;
+    -webkit-font-smoothing: antialiased;
+    transition: background-color 0.25s ease, color 0.25s ease;
+  }
+
+  /* ── Dark mode body ── */
+  html.dark body {
+    background: #080f1a;
+    color: #e0e8ff;
+  }
+
+  /* ── Scrollbar — light ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #c0d0f0; border-radius: 4px; }
+  ::-webkit-scrollbar-thumb:hover { background: #8090c0; }
+
+  /* ── Scrollbar — dark ── */
+  html.dark ::-webkit-scrollbar-thumb { background: #1e2d4a; }
+  html.dark ::-webkit-scrollbar-thumb:hover { background: #2a3a5c; }
+}
+
+@layer utilities {
+  /* Light shimmer */
+  .shimmer-bg {
+    background: linear-gradient(90deg, #e8eeff 25%, #d0daff 50%, #e8eeff 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+
+  /* Dark shimmer */
+  html.dark .shimmer-bg {
+    background: linear-gradient(90deg, #0e1828 25%, #152238 50%, #0e1828 75%);
+    background-size: 200% 100%;
+  }
+
+  /* Light glass */
+  .glass {
+    background: rgba(255,255,255,0.7);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  /* Dark glass */
+  html.dark .glass {
+    background: rgba(14, 24, 40, 0.82);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+  }
+
+  .glass-dark {
+    background: rgba(14,24,40,0.75);
+    backdrop-filter: blur(12px);
+  }
+
+  .text-balance { text-wrap: balance; }
+}
+
+/* ── Voice ripple ── */
+@keyframes ripple {
+  0%   { transform: scale(1);   opacity: 0.6; }
+  100% { transform: scale(2.2); opacity: 0; }
+}
+.voice-ripple   { animation: ripple 1.2s ease-out infinite; }
+.voice-ripple-2 { animation: ripple 1.2s ease-out 0.4s infinite; }
+
+/* ── Score bar ── */
+.score-bar-fill { transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+
+/* ── Textarea autofill dark fix ── */
+html.dark input:-webkit-autofill,
+html.dark textarea:-webkit-autofill {
+  -webkit-box-shadow: 0 0 0 1000px #0e1828 inset !important;
+  -webkit-text-fill-color: #e0e8ff !important;
+}
