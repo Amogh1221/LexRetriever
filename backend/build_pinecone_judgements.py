@@ -21,7 +21,7 @@ from pinecone import Pinecone, ServerlessSpec
 import torch
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-PINECONE_API_KEY  = "pcsk_3xZm5c_FcWbAXNUTzNUgMzimd1aQ2FHk9dbp8idGoWH429FGFFMwwu6KppRPd4bp6NdGek"   # ← paste your key
+PINECONE_API_KEY  = "Enter your Pincone_API"   # ← paste your key
 PINECONE_INDEX    = "legal-judgements"
 PINECONE_CLOUD    = "aws"
 PINECONE_REGION   = "us-east-1"
