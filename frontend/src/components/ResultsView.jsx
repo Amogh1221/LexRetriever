@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { Search, Filter, Bookmark, FileDown, X, GitCompare, Calendar, Loader, Download } from 'lucide-react'
 import CitationCard from './CitationCard'
 import ChatBot from './ChatBot'
+import ThemeToggle from './ThemeToggle'
 
 const API = '/api'
 const PAGE_SIZE = 10
@@ -199,8 +200,8 @@ Keep it concise and professional.`,
 // ── Bookmarks Panel ───────────────────────────────────────────────────────────
 function BookmarksPanel({ bookmarks, onRemove, onClose }) {
   return (
-    <div className="absolute top-full right-0 mt-2 w-80 bg-white rounded-2xl shadow-xl border border-navy-100 z-40 animate-slide-down overflow-hidden">
-      <div className="flex items-center justify-between px-4 py-3 bg-navy-800">
+    <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-navy-800 rounded-2xl shadow-xl border border-navy-100 dark:border-navy-700 z-40 animate-slide-down overflow-hidden">
+      <div className="flex items-center justify-between px-4 py-3 bg-navy-800 dark:bg-navy-900">
         <h3 className="font-serif font-semibold text-white text-sm flex items-center gap-2">
           <Bookmark size={13} className="text-gold-400" fill="currentColor" />
           Bookmarks ({bookmarks.length})
@@ -211,7 +212,7 @@ function BookmarksPanel({ bookmarks, onRemove, onClose }) {
       </div>
       <div className="max-h-80 overflow-y-auto">
         {bookmarks.length === 0 ? (
-          <div className="px-4 py-8 text-center text-navy-400 text-xs">
+          <div className="px-4 py-8 text-center text-navy-400 dark:text-navy-500 text-xs">
             <Bookmark size={24} className="mx-auto mb-2 opacity-30" />
             No bookmarks yet. Click the bookmark icon on any citation.
           </div>
@@ -219,10 +220,10 @@ function BookmarksPanel({ bookmarks, onRemove, onClose }) {
           bookmarks.map((r, i) => {
             const name = (r.file_name || '').replace(/_/g, ' ').replace(/\s+on\s+\d+.*$/i, '').trim()
             return (
-              <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-navy-50 hover:bg-navy-50 transition-colors">
+              <div key={i} className="flex items-center gap-3 px-4 py-3 border-b border-navy-50 dark:border-navy-700 hover:bg-navy-50 dark:hover:bg-navy-700/50 transition-colors">
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-navy-700 truncate">{name}</p>
-                  <p className="text-[10px] text-navy-400 flex items-center gap-2 mt-0.5">
+                  <p className="text-xs font-medium text-navy-700 dark:text-navy-200 truncate">{name}</p>
+                  <p className="text-[10px] text-navy-400 dark:text-navy-400 flex items-center gap-2 mt-0.5">
                     <span className="flex items-center gap-1"><Calendar size={8} />{r.year || '?'}</span>
                     <span className="font-mono">{Math.round((r.score || 0) * 100)}%</span>
                   </p>
@@ -310,7 +311,7 @@ export default function ResultsView({ results: initialResults, caseText, onBack 
   const isBookmarked = (result) => bookmarks.some(b => b.file_name === result.file_name)
 
   return (
-    <div className="h-screen flex flex-col bg-navy-50">
+    <div className="h-screen flex flex-col bg-navy-50 dark:bg-navy-900 transition-colors duration-300">
 
       {showExport && (
         <ExportModal
@@ -322,32 +323,32 @@ export default function ResultsView({ results: initialResults, caseText, onBack 
       )}
 
       {/* top bar */}
-      <header className="flex items-center gap-4 px-6 py-3.5 bg-white border-b border-navy-100 shadow-sm flex-shrink-0">
+      <header className="flex items-center gap-4 px-6 py-3.5 bg-white dark:bg-navy-800 border-b border-navy-100 dark:border-navy-700 shadow-sm flex-shrink-0">
         <div className="flex items-center gap-3">
-          <div className="w-7 h-7 bg-navy-800 flex items-center justify-center"
+          <div className="w-7 h-7 bg-navy-800 dark:bg-navy-700 flex items-center justify-center"
             style={{ clipPath: 'polygon(50% 0%, 100% 25%, 100% 75%, 50% 100%, 0% 75%, 0% 25%)' }}>
             <span className="text-gold-500 font-serif font-bold text-xs">L</span>
           </div>
-          <span className="font-serif font-bold text-navy-800 text-lg tracking-wide">
-            Lex<span className="text-gold-500">Mind</span>
+          <span className="font-serif font-bold text-navy-800 dark:text-white text-lg tracking-wide">
+            Lex<span className="text-gold-500">Retriever</span>
           </span>
         </div>
 
-        <div className="flex-1 mx-4 px-4 py-2 bg-navy-50 border border-navy-200 rounded-xl
-          text-xs text-navy-500 truncate max-w-lg" title={caseText}>
-          <span className="text-navy-300 mr-2">Case:</span>
+        <div className="flex-1 mx-4 px-4 py-2 bg-navy-50 dark:bg-navy-700 border border-navy-200 dark:border-navy-600 rounded-xl
+          text-xs text-navy-500 dark:text-navy-300 truncate max-w-lg" title={caseText}>
+          <span className="text-navy-300 dark:text-navy-400 mr-2">Case:</span>
           {caseText?.slice(0, 80)}{caseText?.length > 80 ? '…' : ''}
         </div>
 
         <div className="flex items-center gap-2">
           {compareTarget && (
-            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 border border-blue-300
-              text-blue-700 text-xs rounded-xl font-medium">
+            <div className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-700
+              text-blue-700 dark:text-blue-300 text-xs rounded-xl font-medium">
               <GitCompare size={12} />
               <span className="truncate max-w-24">
                 {(compareTarget.file_name || '').replace(/_/g, ' ').slice(0, 20)}
               </span>
-              <button onClick={() => setCompareTarget(null)} className="ml-1 hover:text-blue-900">
+              <button onClick={() => setCompareTarget(null)} className="ml-1 hover:text-blue-900 dark:hover:text-blue-100">
                 <X size={11} />
               </button>
             </div>
@@ -357,8 +358,8 @@ export default function ResultsView({ results: initialResults, caseText, onBack 
             <button onClick={() => setShowBookmarks(s => !s)}
               className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors
                 ${showBookmarks || bookmarks.length > 0
-                  ? 'bg-gold-500/10 border-gold-400/30 text-gold-600'
-                  : 'bg-white border-navy-200 text-navy-500 hover:bg-navy-50'}`}>
+                  ? 'bg-gold-500/10 border-gold-400/30 text-gold-600 dark:text-gold-400'
+                  : 'bg-white dark:bg-navy-700 border-navy-200 dark:border-navy-600 text-navy-500 dark:text-navy-300 hover:bg-navy-50 dark:hover:bg-navy-600'}`}>
               <Bookmark size={13} fill={bookmarks.length > 0 ? 'currentColor' : 'none'} />
               {bookmarks.length > 0 && (
                 <span className="w-4 h-4 rounded-full bg-gold-500 text-white text-[10px] font-bold
@@ -376,15 +377,17 @@ export default function ResultsView({ results: initialResults, caseText, onBack 
 
           <button onClick={() => setShowExport(true)}
             className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium
-              bg-white border border-navy-200 text-navy-500 hover:bg-navy-50 transition-colors">
+              bg-white dark:bg-navy-700 border border-navy-200 dark:border-navy-600 text-navy-500 dark:text-navy-300 hover:bg-navy-50 dark:hover:bg-navy-600 transition-colors">
             <FileDown size={13} /> Export
           </button>
 
           <button onClick={onBack}
             className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium
-              bg-navy-800 text-white hover:bg-navy-700 transition-colors">
+              bg-navy-800 dark:bg-navy-600 text-white hover:bg-navy-700 dark:hover:bg-navy-500 transition-colors">
             <Search size={13} /> New Search
           </button>
+
+          <ThemeToggle />
         </div>
       </header>
 
@@ -392,30 +395,30 @@ export default function ResultsView({ results: initialResults, caseText, onBack 
         <div className="flex-1 flex flex-col overflow-hidden">
 
           {/* results sub-header — count + search filter only, no High/Medium/Low */}
-          <div className="flex items-center gap-4 px-6 py-3 bg-white border-b border-navy-100 flex-shrink-0">
+          <div className="flex items-center gap-4 px-6 py-3 bg-white dark:bg-navy-800 border-b border-navy-100 dark:border-navy-700 flex-shrink-0">
             <div>
-              <span className="font-serif font-semibold text-navy-800 text-sm">
+              <span className="font-serif font-semibold text-navy-800 dark:text-white text-sm">
                 {visibleResults.length} of {filtered.length} Citations
               </span>
-              <span className="text-navy-400 text-xs ml-2">ranked by semantic similarity · scroll for more</span>
+              <span className="text-navy-400 dark:text-navy-400 text-xs ml-2">ranked by semantic similarity · scroll for more</span>
             </div>
 
             <div className="relative ml-auto">
-              <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-300" />
+              <Search size={12} className="absolute left-3 top-1/2 -translate-y-1/2 text-navy-300 dark:text-navy-500" />
               <input
                 value={query}
                 onChange={e => { setQuery(e.target.value); setPage(1) }}
                 placeholder="Filter cases…"
-                className="pl-8 pr-3 py-1.5 bg-navy-50 border border-navy-200 rounded-xl text-xs
-                  text-navy-600 outline-none focus:border-navy-400 w-40 placeholder-navy-300 transition-colors"
+                className="pl-8 pr-3 py-1.5 bg-navy-50 dark:bg-navy-700 border border-navy-200 dark:border-navy-600 rounded-xl text-xs
+                  text-navy-600 dark:text-navy-200 outline-none focus:border-navy-400 dark:focus:border-navy-400 w-40 placeholder-navy-300 dark:placeholder-navy-500 transition-colors"
               />
             </div>
           </div>
 
           {/* cards */}
-          <div ref={scrollRef} className="flex-1 overflow-y-auto p-6">
+          <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 bg-navy-50 dark:bg-navy-900">
             {visibleResults.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-full gap-3 text-navy-400">
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-navy-400 dark:text-navy-500">
                 <Filter size={32} className="opacity-30" />
                 <p className="text-sm">No results match your filter.</p>
               </div>
@@ -438,12 +441,12 @@ export default function ResultsView({ results: initialResults, caseText, onBack 
 
                 <div ref={sentinelRef} className="flex items-center justify-center py-8">
                   {loadingMore ? (
-                    <div className="flex items-center gap-3 text-navy-400 text-sm">
-                      <div className="w-5 h-5 border-2 border-navy-200 border-t-navy-500 rounded-full animate-spin" />
+                    <div className="flex items-center gap-3 text-navy-400 dark:text-navy-500 text-sm">
+                      <div className="w-5 h-5 border-2 border-navy-200 dark:border-navy-600 border-t-navy-500 dark:border-t-navy-300 rounded-full animate-spin" />
                       Loading more citations…
                     </div>
                   ) : (!canShowMore && !hasMore) ? (
-                    <p className="text-xs text-navy-300 font-mono">— All {filtered.length} citations shown —</p>
+                    <p className="text-xs text-navy-300 dark:text-navy-600 font-mono">— All {filtered.length} citations shown —</p>
                   ) : null}
                 </div>
               </>
