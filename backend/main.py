@@ -243,17 +243,30 @@ async def search(req: SearchRequest):
     output = []
     for m in result.get("matches", []):
         meta = m.get("metadata", {})
+        year_str = meta.get("year", "unknown")
+
+        if has_year_filter:
+            try:
+                year_int = int(year_str)
+                if not (req.year_from <= year_int <= req.year_to):
+                    continue
+            except (ValueError, TypeError):
+                continue
+
         output.append({
             "file_name": meta.get("file_name", "Unknown"),
-            "year":      meta.get("year", "Unknown"),
+            "year":      year_str,
             "source":    meta.get("source", ""),
             "score":     round(float(m.get("score", 0)), 4),
             "content":   meta.get("content", ""),
         })
 
     output.sort(key=lambda x: x["score"], reverse=True)
-    return {"results": output[req.offset: req.offset + req.top_k], "count": len(output)}
-
+    paginated = output[req.offset: req.offset + req.top_k]
+    return {
+        "results": paginated,
+        "count":   len(output),
+    }    
 
 @app.post("/api/extract-pdf")
 async def extract_pdf(file: UploadFile = File(...)):
