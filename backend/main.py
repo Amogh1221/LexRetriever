@@ -23,8 +23,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # ── Configuration ─────────────────────────────────────────────────────────────
-PINECONE_API_KEY        = os.getenv("PINECONE_API_KEY", "pcsk_3xZm5c_FcWbAXNUTzNUgMzimd1aQ2FHk9dbp8idGoWH429FGFFMwwu6KppRPd4bp6NdGek")
-HF_API_KEY              = os.getenv("HF_API_KEY", "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")
+PINECONE_API_KEY        = os.getenv("PINECONE_API_KEY", "")
+HF_API_KEY              = os.getenv("HF_API_KEY", "")
 
 JUDGEMENTS_INDEX        = "legal-judgements"
 LEGAL_FRAMEWORK_INDEX   = "legal-framework"
