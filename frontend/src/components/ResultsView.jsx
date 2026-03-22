@@ -290,7 +290,59 @@ const yearDist = useMemo(() => {
 
   const visibleResults = filtered.slice(0, page * PAGE_SIZE)
   const canShowMore = page * PAGE_SIZE < filtered.length
+  const applyDecadeFilter = async (decade) => {
+    if (filterLoading) return
+    setActiveDecade(decade)
+    setShowCustom(false)
+    if (decade.label === 'All') {
+      setAllResults(initialResults)
+      setOffset(initialResults.length)
+      setPage(1)
+      setHasMore(true)
+      return
+    }
+    setFilterLoading(true)
+    try {
+      const r = await fetch(`${API}/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: caseText, top_k: 20, offset: 0, year_from: decade.from, year_to: decade.to }),
+      })
+      if (!r.ok) throw new Error()
+      const data = await r.json()
+      const fetched = data.results || []
+      setAllResults(fetched)
+      setOffset(fetched.length)
+      setPage(1)
+      setHasMore(fetched.length >= 20)
+    } catch {}
+    finally { setFilterLoading(false) }
+  }
 
+  const applyCustomRange = async () => {
+    const from = parseInt(customRange.from)
+    const to   = parseInt(customRange.to)
+    if (isNaN(from) || isNaN(to) || from > to) return
+    const custom = { label: 'Custom', from, to }
+    setActiveDecade(custom)
+    setShowCustom(false)
+    setFilterLoading(true)
+    try {
+      const r = await fetch(`${API}/search`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: caseText, top_k: 20, offset: 0, year_from: from, year_to: to }),
+      })
+      if (!r.ok) throw new Error()
+      const data = await r.json()
+      const fetched = data.results || []
+      setAllResults(fetched)
+      setOffset(fetched.length)
+      setPage(1)
+      setHasMore(fetched.length >= 20)
+    } catch {}
+    finally { setFilterLoading(false) }
+  }
   const fetchMore = useCallback(async () => {
     if (loadingMore) return
     setLoadingMore(true)
@@ -298,7 +350,13 @@ const yearDist = useMemo(() => {
       const r = await fetch(`${API}/search`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: caseText, top_k: PAGE_SIZE, offset })
+        body: JSON.stringify({
+          query:     caseText,
+          top_k:     PAGE_SIZE,
+          offset,
+          year_from: activeDecade.from,
+          year_to:   activeDecade.to,
+        })
       })
       if (!r.ok) throw new Error()
       const data = await r.json()
@@ -310,7 +368,7 @@ const yearDist = useMemo(() => {
       }
     } catch { setHasMore(false) }
     finally { setLoadingMore(false) }
-  }, [loadingMore, offset, caseText])
+  }, [loadingMore, offset, caseText, activeDecade])
 
   useEffect(() => {
     const sentinel = sentinelRef.current
@@ -439,7 +497,87 @@ const yearDist = useMemo(() => {
               />
             </div>
           </div>
-
+{/* ── Year / decade filter strip ── */}
+          <div className="flex items-center gap-2 px-6 py-3 bg-white dark:bg-navy-800 border-b border-navy-100 dark:border-navy-700 flex-shrink-0 overflow-x-auto">
+            <span className="text-[11px] font-semibold text-navy-400 uppercase tracking-wide flex-shrink-0 mr-1">
+              Period
+            </span>
+            {DECADES.map(d => {
+              const isActive = activeDecade.label === d.label
+              const badge = d.label === 'All' ? allResults.length : (yearDist[d.label] || 0)
+              return (
+                <button key={d.label} onClick={() => applyDecadeFilter(d)} disabled={filterLoading}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium
+                    flex-shrink-0 border transition-all duration-200
+                    ${isActive ? 'bg-navy-800 text-white border-navy-800 shadow-sm'
+                      : 'bg-white dark:bg-navy-700 text-navy-500 dark:text-navy-300 border-navy-200 dark:border-navy-600 hover:border-navy-400 hover:text-navy-700 disabled:opacity-50 disabled:cursor-not-allowed'}`}>
+                  {d.label}
+                  {badge > 0 && (
+                    <span className={`text-[10px] font-mono px-1.5 py-0.5 rounded-full leading-none
+                      ${isActive ? 'bg-white/20 text-white' : 'bg-navy-100 dark:bg-navy-600 text-navy-400 dark:text-navy-300'}`}>
+                      {badge}
+                    </span>
+                  )}
+                </button>
+              )
+            })}
+            <div className="relative flex-shrink-0">
+              <button onClick={() => setShowCustom(s => !s)} disabled={filterLoading}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all
+                  ${activeDecade.label === 'Custom' ? 'bg-gold-500 text-white border-gold-500 shadow-sm'
+                    : 'bg-white dark:bg-navy-700 text-navy-500 dark:text-navy-300 border-navy-200 dark:border-navy-600 hover:border-navy-400 disabled:opacity-50 disabled:cursor-not-allowed'}`}>
+                {activeDecade.label === 'Custom' ? `${activeDecade.from}–${activeDecade.to}` : 'Custom'}
+                <ChevronDown size={10} className={`transition-transform duration-200 ${showCustom ? 'rotate-180' : ''}`} />
+              </button>
+              {showCustom && (
+                <div className="absolute top-full left-0 mt-2 z-30 w-52 animate-slide-down
+                  bg-white dark:bg-navy-800 border border-navy-200 dark:border-navy-600 rounded-xl shadow-xl p-4">
+                  <p className="text-[11px] font-semibold text-navy-600 dark:text-navy-300 uppercase tracking-wide mb-3">Custom year range</p>
+                  <div className="flex items-end gap-2 mb-3">
+                    <div className="flex-1">
+                      <label className="text-[10px] text-navy-400 block mb-1">From</label>
+                      <input type="number" placeholder="1950" min="1900" max="2030"
+                        value={customRange.from}
+                        onChange={e => setCustomRange(p => ({ ...p, from: e.target.value }))}
+                        className="w-full px-2.5 py-1.5 border border-navy-200 dark:border-navy-600 rounded-lg text-xs
+                          text-navy-700 dark:text-navy-200 bg-white dark:bg-navy-700 outline-none focus:border-navy-400" />
+                    </div>
+                    <span className="text-navy-300 text-sm pb-1.5">–</span>
+                    <div className="flex-1">
+                      <label className="text-[10px] text-navy-400 block mb-1">To</label>
+                      <input type="number" placeholder="2024" min="1900" max="2030"
+                        value={customRange.to}
+                        onChange={e => setCustomRange(p => ({ ...p, to: e.target.value }))}
+                        className="w-full px-2.5 py-1.5 border border-navy-200 dark:border-navy-600 rounded-lg text-xs
+                          text-navy-700 dark:text-navy-200 bg-white dark:bg-navy-700 outline-none focus:border-navy-400" />
+                    </div>
+                  </div>
+                  <button onClick={applyCustomRange} disabled={!customRange.from || !customRange.to}
+                    className="w-full py-2 bg-navy-800 text-white text-xs font-semibold rounded-lg
+                      disabled:opacity-40 disabled:cursor-not-allowed hover:bg-navy-700 transition-colors">
+                    Apply range
+                  </button>
+                </div>
+              )}
+            </div>
+            {filterLoading && (
+              <div className="flex items-center gap-1.5 text-xs text-navy-400 flex-shrink-0 ml-1">
+                <div className="w-3 h-3 border border-navy-300 border-t-navy-600 rounded-full animate-spin" />
+                Searching…
+              </div>
+            )}
+            {activeDecade.label !== 'All' && !filterLoading && (
+              <div className="flex items-center gap-1.5 ml-auto flex-shrink-0">
+                <span className="text-xs text-navy-400">
+                  <span className="font-semibold text-navy-700 dark:text-white">{allResults.length}</span> result{allResults.length !== 1 ? 's' : ''} in this period
+                </span>
+                <button onClick={() => applyDecadeFilter(DECADES[0])}
+                  className="p-1 rounded-full text-navy-300 hover:text-navy-600 hover:bg-navy-100 dark:hover:bg-navy-700 transition-colors">
+                  <X size={11} />
+                </button>
+              </div>
+            )}
+          </div>
           {/* cards */}
           <div ref={scrollRef} className="flex-1 overflow-y-auto p-6 bg-navy-50 dark:bg-navy-900">
             {visibleResults.length === 0 ? (
