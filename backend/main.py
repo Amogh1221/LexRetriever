@@ -220,11 +220,16 @@ async def health():
 
 @app.post("/api/search")
 async def search(req: SearchRequest):
-    """Semantic search over judgements Pinecone index with pagination."""
+    """Semantic search over judgements Pinecone index with pagination and optional year filtering."""
     if not req.query.strip():
         raise HTTPException(status_code=400, detail="Query cannot be empty.")
 
-    fetch_k = min(req.offset + req.top_k, 100)
+    has_year_filter = req.year_from is not None and req.year_to is not None
+
+    if has_year_filter:
+        fetch_k = min(300, max(req.offset + req.top_k * 10, 150))
+    else:
+        fetch_k = min(req.offset + req.top_k, 100)
 
     try:
         result = judgements_index.query(
