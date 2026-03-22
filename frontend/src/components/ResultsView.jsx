@@ -1,5 +1,5 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { Search, Filter, Bookmark, FileDown, X, GitCompare, Calendar, Loader, Download } from 'lucide-react'
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import { Search, Filter, Bookmark, FileDown, X, GitCompare, Calendar, Loader, Download, ChevronDown } from 'lucide-react'
 import CitationCard from './CitationCard'
 import ChatBot from './ChatBot'
 import ThemeToggle from './ThemeToggle'
@@ -7,6 +7,15 @@ import ThemeToggle from './ThemeToggle'
 const API = '/api'
 const PAGE_SIZE = 10
 
+const DECADES = [
+  { label: 'All',      from: null, to: null },
+  { label: 'Pre-1980', from: 1900, to: 1979 },
+  { label: '1980s',    from: 1980, to: 1989 },
+  { label: '1990s',    from: 1990, to: 1999 },
+  { label: '2000s',    from: 2000, to: 2009 },
+  { label: '2010s',    from: 2010, to: 2019 },
+  { label: '2020s',    from: 2020, to: 2029 },
+]
 // ── Export Modal ──────────────────────────────────────────────────────────────
 function ExportModal({ results, caseText, bookmarks, onClose }) {
   const [phase, setPhase] = useState('idle')   // idle | generating | done | error
@@ -254,7 +263,23 @@ export default function ResultsView({ results: initialResults, caseText, onBack 
   const [showBookmarks, setShowBookmarks] = useState(false)
   const [showExport, setShowExport] = useState(false)
   const [compareTarget, setCompareTarget] = useState(null)
+  const [activeDecade, setActiveDecade]   = useState(DECADES[0])
+  const [customRange, setCustomRange]     = useState({ from: '', to: '' })
+  const [showCustom, setShowCustom]       = useState(false)
+  const [filterLoading, setFilterLoading] = useState(false)
 
+const yearDist = useMemo(() => {
+  const dist = {}
+  DECADES.forEach(d => { if (d.label !== 'All') dist[d.label] = 0 })
+  allResults.forEach(r => {
+    const y = parseInt(r.year)
+    if (!isNaN(y)) {
+      const match = DECADES.find(d => d.from && y >= d.from && y <= d.to)
+      if (match) dist[match.label] = (dist[match.label] || 0) + 1
+    }
+  })
+  return dist
+}, [allResults])
   const scrollRef = useRef()
   const sentinelRef = useRef()
 
