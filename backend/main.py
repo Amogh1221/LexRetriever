@@ -23,8 +23,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # ── Configuration ─────────────────────────────────────────────────────────────
-PINECONE_API_KEY        = os.getenv("PINECONE_API_KEY", "")
-HF_API_KEY              = os.getenv("HF_API_KEY", "")
+PINECONE_API_KEY        = os.getenv("PINECONE_API_KEY", "pcsk_3xZm5c_FcWbAXNUTzNUgMzimd1aQ2FHk9dbp8idGoWH429FGFFMwwu6KppRPd4bp6NdGek")
+HF_API_KEY              = os.getenv("HF_API_KEY", "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")
 
 JUDGEMENTS_INDEX        = "legal-judgements"
 LEGAL_FRAMEWORK_INDEX   = "legal-framework"
@@ -92,11 +92,11 @@ app.add_middleware(
 
 # ── Pydantic models ───────────────────────────────────────────────────────────
 class SearchRequest(BaseModel):
-    query:  str
-    top_k:  int = 10
-    offset: int = 0
-
-
+    query:     str
+    top_k:     int = 10
+    offset:    int = 0
+    year_from: Optional[int] = None
+    year_to:   Optional[int] = None
 class ChatRequest(BaseModel):
     message:        str
     context:        str = ""
