@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import {
   X, Copy, Sparkles, Calendar, Scale, BookOpen, Download,
   Bookmark, GripVertical, GitCompare, FileText, Brain, Loader
 } from 'lucide-react'
+import CopyButton from './CopyButton'
 
 const API = '/api'
 
@@ -424,10 +425,29 @@ export default function CitationCard({
   const [showModal, setShowModal] = useState(false)
   const [showModePicker, setShowModePicker] = useState(false)
   const [compareMode, setCompareMode] = useState(null)
+  const [isHovered, setIsHovered] = useState(false)
+  const cardRef = useRef(null)
 
   const score = result.score
   const pct = Math.round(score * 100)
   const caseName = cleanName(result)
+  const citationText = `${caseName} (${result.year || '?'}) — Supreme Court of India`
+
+  // Commit 4 — C keyboard shortcut when card is hovered
+  useEffect(() => {
+    if (!isHovered) return
+    const handler = (e) => {
+      if (e.key === 'c' || e.key === 'C') {
+        // Don't fire if user is typing in an input/textarea
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return
+        navigator.clipboard.writeText(citationText).catch(() => {})
+        setCopied(true)
+        setTimeout(() => setCopied(false), 2000)
+      }
+    }
+    window.addEventListener('keydown', handler)
+    return () => window.removeEventListener('keydown', handler)
+  }, [isHovered, citationText])
 
   const scoreColor =
     score >= 0.75 ? 'text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-700' :
@@ -521,8 +541,11 @@ export default function CitationCard({
 
       {/* ── Card ── */}
       <div
+        ref={cardRef}
         draggable
         onDragStart={handleDragStart}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
         className={`rounded-2xl overflow-hidden cursor-grab active:cursor-grabbing
           shadow-sm hover:shadow-md transition-all duration-300 animate-slide-up
           bg-white dark:bg-navy-800
@@ -639,19 +662,10 @@ export default function CitationCard({
             {showSummary && summary ? (summarizing ? 'Summarizing…' : 'Hide') : 'Summarize'}
           </button>
 
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(caseName)
-              setCopied(true)
-              setTimeout(() => setCopied(false), 2000)
-            }}
-            className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-medium transition-all border
-              bg-navy-50 dark:bg-navy-700/50 text-navy-500 dark:text-navy-400
-              hover:bg-navy-100 dark:hover:bg-navy-700
-              border-navy-200 dark:border-navy-600">
-            <Copy size={11} />
-            {copied ? 'Copied!' : 'Copy'}
-          </button>
+          <CopyButton
+            text={citationText}
+            label={isHovered ? 'Copy  [C]' : 'Copy citation'}
+          />
         </div>
       </div>
     </>
