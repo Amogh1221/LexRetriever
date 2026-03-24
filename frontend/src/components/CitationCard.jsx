@@ -4,6 +4,7 @@ import {
   Bookmark, GripVertical, GitCompare, FileText, Brain, Loader
 } from 'lucide-react'
 import CopyButton from './CopyButton'
+import Toast from './Toast'
 
 const API = '/api'
 
@@ -426,7 +427,13 @@ export default function CitationCard({
   const [showModePicker, setShowModePicker] = useState(false)
   const [compareMode, setCompareMode] = useState(null)
   const [isHovered, setIsHovered] = useState(false)
+  const [showToast, setShowToast] = useState(false)
   const cardRef = useRef(null)
+
+  const fireToast = () => {
+    setShowToast(true)
+    setTimeout(() => setShowToast(false), 2000)
+  }
 
   const score = result.score
   const pct = Math.round(score * 100)
@@ -442,6 +449,7 @@ export default function CitationCard({
         if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return
         navigator.clipboard.writeText(citationText).catch(() => {})
         setCopied(true)
+        fireToast()
         setTimeout(() => setCopied(false), 2000)
       }
     }
@@ -493,6 +501,7 @@ export default function CitationCard({
 
   return (
     <>
+      <Toast visible={showToast} />
       {showModal && <JudgementModal result={result} onClose={() => setShowModal(false)} />}
 
       {showModePicker && (
@@ -665,6 +674,7 @@ export default function CitationCard({
           <CopyButton
             text={citationText}
             label={isHovered ? 'Copy  [C]' : 'Copy citation'}
+            onCopy={fireToast}
           />
         </div>
       </div>

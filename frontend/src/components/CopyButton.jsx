@@ -8,12 +8,17 @@ import { useCopyToClipboard } from '../hooks/useCopyToClipboard'
  *   label     — button label when idle   (default: 'Copy citation')
  *   className — extra classes for the button element
  */
-export default function CopyButton({ text, label = 'Copy citation', className = '' }) {
+export default function CopyButton({ text, label = 'Copy citation', className = '', onCopy }) {
   const [copied, copy] = useCopyToClipboard(2000)
+
+  const handleClick = () => {
+    copy(text)
+    onCopy?.()
+  }
 
   return (
     <button
-      onClick={() => copy(text)}
+      onClick={handleClick}
       title={copied ? 'Copied!' : label}
       className={`flex items-center gap-1 text-xs px-3 py-1.5 rounded-lg font-medium
         transition-all duration-200 border select-none
