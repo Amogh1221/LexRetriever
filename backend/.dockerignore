@@ -1,0 +1,8 @@
+.env
+__pycache__
+*.pyc
+.venv
+models/
+judgements_extracted/
+legal_db/
+constitution_db/
