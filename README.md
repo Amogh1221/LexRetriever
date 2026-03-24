@@ -1,4 +1,4 @@
-# LexMind — Fullstack (React + FastAPI)
+# LexRetriever — Fullstack (React + FastAPI)
 
 This repo is organized into two main folders:
 
