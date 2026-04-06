@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "https://amogh1221-lexretriver.hf.space/api/:path*"
+    }
+  ]
+}

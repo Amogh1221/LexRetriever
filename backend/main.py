@@ -23,8 +23,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 # ── Configuration ─────────────────────────────────────────────────────────────
-PINECONE_API_KEY        = os.getenv("PINECONE_API_KEY", "")
-HF_API_KEY              = os.getenv("HF_API_KEY", "")
+PINECONE_API_KEY        = os.getenv("pinecone", "")
+HF_API_KEY              = os.getenv("hf_tokens", "")
 
 JUDGEMENTS_INDEX        = "legal-judgements"
 LEGAL_FRAMEWORK_INDEX   = "legal-framework"
